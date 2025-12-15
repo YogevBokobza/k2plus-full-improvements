@@ -1,0 +1,12 @@
+[submodule "go-filament-sync"]
+	path = go-filament-sync
+	url = https://github.com/zaggash/go-filament-sync.git
+[submodule "k2-improvements"]
+	path = k2-improvements
+	url = https://github.com/CampbellFabrications/k2-improvements
+[submodule "Spoolman"]
+	path = Spoolman
+	url = https://github.com/Donkie/Spoolman
+[submodule "K2-Camera"]
+	path = K2-Camera
+	url = https://github.com/DnG-Crafts/K2-Camera

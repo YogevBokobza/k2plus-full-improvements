@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creality K2 Reset Utility</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-top: 20px;
+            max-width: 900px;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .button-container {
+            text-align: right;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #FE2E2E;
+        }
+        .message {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .error-message {
+            color: red;
+        }
+        .success-message {
+            color: #088A08;
+        }
+        .failure-message {
+            color: #FE2E2E;
+        }
+        a {
+            color: #6E6E6E;
+            text-decoration: none;
+            #font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://raw.githubusercontent.com/Guilouz/Creality-K1-Series/main/docs/assets/img/home/logo-text.png" alt="Creality Logo" width="500"><br><br>
+        <b>This utility allows restoring Creality printers to factory settings</b><br><br>
+        <p style="text-align: left; color: #6E6E6E;">
+            <b>1.</b> Make sure your printer is turned on and connected to the same local network as the device used with this utility.<br><br>
+            <b>2.</b> Please enter your printer's IP address and click the <b>Reset</b> button to restore your printer to factory settings.<br><br>
+            <b>3.</b> If the <span style="color: #088A08; white-space: nowrap;">Reset successfully completed!</span> message appears, your printer will restart with the settings reset to factory defaults.
+        </p><br><br>
+        
+        <input type="text" id="ip" name="ip" placeholder="Enter IP address">
+        <div class="button-container">
+            <button onclick="reset()">Reset</button>
+        </div>
+        <p class="message error-message" id="error-message"></p>
+        <p class="message success-message" id="result-message"></p>
+        <a href="https://github.com/Guilouz" target="_blank">Guislain Cyril © All rights reserved</a>
+    </div>
+
+    <script>
+        function isValidIPAddress(ip) {
+            var ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+            return ipPattern.test(ip);
+        }
+
+        function showError(errorMessage) {
+            var errorElement = document.getElementById("error-message");
+            errorElement.textContent = errorMessage;
+        }
+
+        function sendPayload(payload, needAlert = true) {
+            var ip = document.getElementById("ip").value;
+            var socket = new WebSocket('ws://' + ip + ':9999');
+            socket.onopen = function (e) {
+                socket.send(payload);
+                if (needAlert) {
+                    setTimeout(function () {
+                        if (socket.readyState === WebSocket.OPEN) {
+                            showResult("Reset successfully completed!", "success-message");
+                            socket.close();
+                        } else {
+                            showError('Reset failed!');
+                        }
+                    }, 100);
+                }
+            }
+        }
+
+        function showResult(resultMessage, resultClass) {
+            var resultElement = document.getElementById("result-message");
+            resultElement.textContent = resultMessage;
+            resultElement.className = resultClass;
+        }
+
+        function reset() {
+            var ipInput = document.getElementById("ip");
+            var ip = ipInput.value;
+            var errorMessage = document.getElementById("error-message");
+
+            if (!isValidIPAddress(ip)) {
+                errorMessage.textContent = "Please enter a valid IP address!";
+                return;
+            } else {
+                errorMessage.textContent = "";
+            }
+
+            var resultMessage = document.getElementById("result-message");
+            resultMessage.textContent = "";
+            resultMessage.className = "";
+
+            sendPayload('{"method":"set","params":{"resetSystem":15}}');
+        }
+
+        document.getElementById("ip").addEventListener("input", function () {
+            var errorMessage = document.getElementById("error-message");
+            errorMessage.textContent = "";
+        });
+    </script>
+</body>
+</html>
